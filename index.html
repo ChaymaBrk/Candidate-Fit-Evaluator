@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Candidate Fit Evaluator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #f8f8f9 0%, hsl(240, 5%, 96%) 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .upload-section {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 2px dashed #e2e8f0;
+            transition: all 0.3s ease;
+        }
+
+        .upload-section:hover {
+            border-color: #60a5fa;
+            background: #f1f5f9;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+
+        input[type="file"], input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="file"]:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #60a5fa;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #60a5fa 0%, #93c5fd 100%);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .fit-score {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .fit-score.moderate {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+        }
+
+        .fit-score.low {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .fit-score h2 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .fit-score p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
+        }
+
+        .result-card h3 {
+            color: #60a5fa;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+
+        .result-card ul {
+            list-style: none;
+        }
+
+        .result-card li {
+            padding: 8px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .result-card li:last-child {
+            border-bottom: none;
+        }
+
+        .comparison-matrix {
+            width: 100%;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .comparison-matrix h3 {
+            background: #60a5fa;
+            color: white;
+            padding: 20px;
+            margin: 0;
+            text-align: center;
+        }
+
+        .matrix-item {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .matrix-item:last-child {
+            border-bottom: none;
+        }
+
+        .match-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .match-indicator.match {
+            background: #10b981;
+        }
+
+        .match-indicator.no-match {
+            background: #ef4444;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #60a5fa;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #b91c1c;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>AI Candidate Fit Evaluator</h1>
+            <p>Evaluate how well a candidate's resume matches a job description</p>
+        </div>
+
+        <div class="content">
+            <div class="upload-section">
+                <form id="evaluationForm">
+                    <div class="form-group">
+                        <label for="candidateName">Candidate Name (Optional)</label>
+                        <input type="text" id="candidateName" name="candidateName" placeholder="Enter candidate name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="resumeFile">Resume File (PDF or DOCX)</label>
+                        <input type="file" id="resumeFile" name="resumeFile" accept=".pdf,.docx" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="jobDescriptionFile">Job Description File (PDF, DOCX, or TXT)</label>
+                        <input type="file" id="jobDescriptionFile" name="jobDescriptionFile" accept=".pdf,.docx,.txt" required>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn">Evaluate Candidate Fit</button>
+                </form>
+            </div>
+
+            <div id="loadingSection" class="loading" style="display: none;">
+                <div class="loading-spinner"></div>
+                <p>Analyzing candidate fit... This may take a moment.</p>
+            </div>
+
+            <div id="errorSection" class="error-message" style="display: none;"></div>
+
+            <div id="resultsSection" class="results-section">
+                <div id="fitScore" class="fit-score">
+                    <h2 id="fitScoreText"></h2>
+                    <p id="fitPercentage"></p>
+                </div>
+
+                <div class="results-grid">
+                    <div class="result-card">
+                        <h3>Strengths</h3>
+                        <ul id="strengthsList"></ul>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>Weakness</h3>
+                        <ul id="weaknessesList"></ul>
+                    </div>
+                    
+                    <div class="result-card">
+                        <h3>Explanation</h3>
+                        <div id="explanationText"></div>
+                    </div>
+                </div>
+
+                <div class="comparison-matrix">
+                    <h3>Requirements Comparison</h3>
+                    <div id="matrixContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('evaluationForm');
+        const loadingSection = document.getElementById('loadingSection');
+        const errorSection = document.getElementById('errorSection');
+        const resultsSection = document.getElementById('resultsSection');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = form.querySelector('.submit-btn');
+            
+            // Show loading state
+            loadingSection.style.display = 'block';
+            resultsSection.style.display = 'none';
+            errorSection.style.display = 'none';
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Processing...';
+
+            try {
+                const candidateName = document.getElementById('candidateName').value;
+                const resumeFile = document.getElementById('resumeFile').files[0];
+                const jobDescriptionFile = document.getElementById('jobDescriptionFile').files[0];
+                
+                // Create FormData object with the exact field names expected by FastAPI
+                const formData = new FormData();
+                formData.append('resume_file', resumeFile);
+                formData.append('job_description_file', jobDescriptionFile);
+                if (candidateName) {
+                    formData.append('candidate_name', candidateName);
+                }
+                
+                const response = await fetch(`http://localhost:8000/evaluate-fit`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                showError(`Error: ${error.message}`);
+            } finally {
+                loadingSection.style.display = 'none';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Evaluate Candidate Fit';
+            }
+        });
+
+        function displayResults(data) {
+            // Update fit score
+            const fitScoreElement = document.getElementById('fitScore');
+            const fitScoreText = document.getElementById('fitScoreText');
+            const fitPercentage = document.getElementById('fitPercentage');
+            
+            fitScoreText.textContent = data.fit_score;
+            fitPercentage.textContent = `${data.fit_percentage}% Match`;
+            
+            // Update fit score styling based on percentage
+            fitScoreElement.className = 'fit-score';
+            if (data.fit_percentage >= 80) {
+                fitScoreElement.classList.add('high');
+            } else if (data.fit_percentage >= 60) {
+                fitScoreElement.classList.add('moderate');
+            } else {
+                fitScoreElement.classList.add('low');
+            }
+
+            // Update strengths
+            const strengthsList = document.getElementById('strengthsList');
+            strengthsList.innerHTML = '';
+            data.strengths.forEach(strength => {
+                const li = document.createElement('li');
+                li.textContent = strength;
+                strengthsList.appendChild(li);
+            });
+
+            // Update weaknesses
+            const weaknessesList = document.getElementById('weaknessesList');
+            weaknessesList.innerHTML = '';
+            data.weaknesses.forEach(weakness => {
+                const li = document.createElement('li');
+                li.textContent = weakness;
+                weaknessesList.appendChild(li);
+            });
+
+            // Update explanation
+            const explanationText = document.getElementById('explanationText');
+            explanationText.innerHTML = `<p>${data.explanation}</p>`;
+
+            // Update comparison matrix
+            const matrixContent = document.getElementById('matrixContent');
+            matrixContent.innerHTML = '';
+            data.comparison_matrix.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'matrix-item';
+                div.innerHTML = `
+                    <div class="match-indicator ${item.match ? 'match' : 'no-match'}"></div>
+                    <span>${item.requirement}</span>
+                `;
+                matrixContent.appendChild(div);
+            });
+
+            resultsSection.style.display = 'block';
+        }
+
+        function showError(message) {
+            errorSection.textContent = message;
+            errorSection.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
