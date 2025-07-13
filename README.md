@@ -222,14 +222,10 @@ The system uses FAISS with the following default settings:
 - **Embedding Model**: `all-MiniLM-L6-v2` (Sentence Transformers)
 - **Index Type**: IndexFlatIP (Inner Product for cosine similarity)
 - **Dimension**: 384 (Sentence Transformers output dimension)
-- **Chunk Size**: 500 characters
-- **Overlap**: 50 characters
 
 ### LLM Settings
 
-- **Primary**: Groq meta-llama/llama-4-scout-17b-16e-instruct (if API key provided)
-- **Fallback**: OpenAI GPT-3.5-turbo (if API key provided)
-- **Secondary Fallback**: Keyword-based matching and similarity scoring
+- **Primary**: Groq meta-llama/llama-4-scout-17b-16e-instruct 
 
 ## 📊 Evaluation Process
 
@@ -262,8 +258,8 @@ The system uses FAISS with the following default settings:
 │       ├── document_parser.py
 │       ├── text_chunker.py
 │       ├── vector_store.py
-│       └── llm_service.py
-└── tests/                # Test files (to be added)
+└──      └── llm_service.py
+
 ```
 
 ### Adding New Features
@@ -297,7 +293,6 @@ curl http://localhost:8000/health
 # Response: {"status": "healthy", "service": "AI Candidate Fit Evaluator"}
 ```
 
-## 🚨 Troubleshooting
 
 ### Common Issues
 
@@ -312,25 +307,6 @@ curl http://localhost:8000/health
 - Enable GPU acceleration for Sentence Transformers if available
 - Consider using a more powerful LLM for better accuracy
 
-## 📝 License
 
-This project is licensed under the MIT License.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
-
-## 📞 Support
-
-For issues and questions:
-1. Check the troubleshooting section
-2. Review the API documentation at `/docs`
-3. Open an issue on GitHub
-
----
 
 **Built with ❤️ using FastAPI, FAISS, and Groq (Llama)** 
