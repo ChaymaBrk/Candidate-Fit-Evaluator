@@ -13,8 +13,8 @@ from typing import Optional
 # Add src to path
 sys.path.append(str(Path(__file__).parent / "src"))
 
-from services.candidate_evaluator import CandidateEvaluator
-from models.response_models import FitEvaluationResponse
+from src.services.candidate_evaluator import CandidateEvaluator
+from src.models.response_models import FitEvaluationResponse
 import json
 
 class MockUploadFile:
