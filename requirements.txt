@@ -4,10 +4,9 @@ python-multipart
 pydantic
 python-docx
 pdfplumber
-numpy
 python-dotenv
 aiofiles
 groq
-faiss-cpu==1.7.4
-sentence-transformers==2.2.2
-numpy==1.24.4
+faiss-cpu>=1.8.0  # Updated for Python 3.12 compatibility
+sentence-transformers>=2.7.0  # Updated for Python 3.12 compatibility
+numpy>=1.26.0  # Version with Python 3.12 support
