@@ -10,5 +10,4 @@ env
 venv
 *.pdf
 *.docx
-*.txt
 faiss_storage
