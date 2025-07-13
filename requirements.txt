@@ -7,6 +7,6 @@ pdfplumber
 python-dotenv
 aiofiles
 groq
+openai
 faiss-cpu>=1.8.0  # Updated for Python 3.12 compatibility
-sentence-transformers>=2.7.0  # Updated for Python 3.12 compatibility
 numpy>=1.26.0  # Version with Python 3.12 support

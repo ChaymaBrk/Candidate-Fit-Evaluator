@@ -1,21 +1,29 @@
 import faiss
 import numpy as np
-from sentence_transformers import SentenceTransformer
 from typing import List, Dict, Any, Optional
 import logging
 import pickle
 from pathlib import Path
 import re
+from openai import AzureOpenAI
 
 logger = logging.getLogger(__name__)
+AZURE_OPENAI_ENDPOINT="https://norch-m2irp375-switzerlandnorth.cognitiveservices.azure.com"
+azure_openai_api_key="10d62b9f3c784273bf05bdea0edbd879"
 
+# Azure OpenAI and Search Index Clients
+openai_client = AzureOpenAI(
+    azure_endpoint=AZURE_OPENAI_ENDPOINT,
+    api_key=azure_openai_api_key,
+    api_version="2024-06-01"
+)
 class VectorStore:
     """FAISS vector store for resume and job requirement matching"""
     
-    def __init__(self, model_name: str = "all-MiniLM-L6-v2", dimension: int = 384):
+    def __init__(self, model_name: str = "text-embedding-3-large", dimension: int = 384):
         self.model_name = model_name
         self.dimension = dimension
-        self.embedding_model = SentenceTransformer(model_name, cache_folder="./model_cache")
+        self.embedding_model = model_name
         
         # Initialize FAISS index
         self.index = faiss.IndexFlatIP(dimension)
@@ -45,10 +53,15 @@ class VectorStore:
 
         try:
             cleaned_chunks = [self._preprocess_text(chunk) for chunk in chunks]
-            embeddings = self.embedding_model.encode(cleaned_chunks, show_progress_bar=False)
+            response = openai_client.embeddings.create(
+                input=cleaned_chunks,
+                model=self.embedding_model
+            )
+            embeddings = response.data[0].embedding
+            print(embeddings)
             
-            if embeddings.shape[0] > 0:
-                self.index.add(embeddings.astype('float32'))
+            if len(embeddings) > 0:
+                
                 self.documents.extend(cleaned_chunks)
                 self.metadata.extend([metadata or {}] * len(cleaned_chunks))
                 self.document_types.extend(['resume'] * len(cleaned_chunks))
@@ -68,10 +81,14 @@ class VectorStore:
 
         try:
             cleaned_reqs = [self._preprocess_text(req) for req in requirements]
-            embeddings = self.embedding_model.encode(cleaned_reqs, show_progress_bar=False)
+            response = openai_client.embeddings.create(
+                input=cleaned_reqs,
+                model=self.embedding_model
+            )
+            embeddings = response.data[0].embedding
             
-            if embeddings.shape[0] > 0:
-                self.index.add(embeddings.astype('float32'))
+            if len(embeddings) > 0:
+                
                 self.documents.extend(cleaned_reqs)
                 self.metadata.extend([metadata or {}] * len(cleaned_reqs))
                 self.document_types.extend(['job'] * len(cleaned_reqs))
@@ -101,7 +118,11 @@ class VectorStore:
 
         try:
             clean_query = self._preprocess_text(query)
-            query_embedding = self.embedding_model.encode([clean_query])
+            response = openai_client.embeddings.create(
+                input=clean_query,
+                model=self.embedding_model
+            )
+            query_embedding = response.data[0].embedding
             
             # Get indices of documents of the requested type
             if doc_type:
@@ -144,8 +165,11 @@ class VectorStore:
         try:
             clean_text1 = self._preprocess_text(text1)
             clean_text2 = self._preprocess_text(text2)
-            
-            embeddings = self.embedding_model.encode([clean_text1, clean_text2])
+            response = openai_client.embeddings.create(
+                input=clean_text1 + clean_text2,
+                model=self.embedding_model
+            )
+            embeddings = response.data[0].embedding
             
             similarity = np.dot(embeddings[0], embeddings[1]) / (
                 np.linalg.norm(embeddings[0]) * np.linalg.norm(embeddings[1])
@@ -275,7 +299,7 @@ if __name__ == "__main__":
     results = vs.find_similar_chunks("legal AI experience with Azure", doc_type="resume")
     for i, res in enumerate(results, 1):
         print(f"{i}. Score: {res['distance']:.3f}")
-        print(f"   Document: {res['document'][:100]}...")
+        print(f"   Document: {res['document'][:100]}.")
         print(f"   Type: {res['type']} | Source: {res['metadata'].get('source', '')}")
     
     # Save and reload the index
