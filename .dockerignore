@@ -1,0 +1,14 @@
+.git
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+.env
+.venv
+env
+venv
+*.pdf
+*.docx
+*.txt
+faiss_storage
