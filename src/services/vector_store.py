@@ -5,16 +5,17 @@ import logging
 import pickle
 from pathlib import Path
 import re
+import os
+from dotenv import load_dotenv
 from openai import AzureOpenAI
-
+load_dotenv()
 logger = logging.getLogger(__name__)
-AZURE_OPENAI_ENDPOINT="https://norch-m2irp375-switzerlandnorth.cognitiveservices.azure.com"
-azure_openai_api_key="10d62b9f3c784273bf05bdea0edbd879"
+
 
 # Azure OpenAI and Search Index Clients
 openai_client = AzureOpenAI(
-    azure_endpoint=AZURE_OPENAI_ENDPOINT,
-    api_key=azure_openai_api_key,
+    azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
+    api_key=os.getenv("AZURE_OPENAI_API_KEY"),
     api_version="2024-06-01"
 )
 class VectorStore:

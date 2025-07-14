@@ -26,9 +26,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.get("/")
-async def root():
-    return {"message": "AI Candidate Fit Evaluator API", "status": "running"}
+
 
 @app.post("/evaluate-fit", response_model=FitEvaluationResponse)
 async def evaluate_candidate_fit(
