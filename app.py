@@ -26,7 +26,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
+@app.get("/")
+async def root():
+    return {"message": "AI Candidate Fit Evaluator API", "status": "running"}
 
 @app.post("/evaluate-fit", response_model=FitEvaluationResponse)
 async def evaluate_candidate_fit(
@@ -77,7 +79,7 @@ async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "service": "AI Candidate Fit Evaluator"}
 
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+app.mount("/ui", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000) 
