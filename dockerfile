@@ -29,16 +29,10 @@ RUN apt-get purge -y --auto-remove build-essential && \
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV SENTENCE_TRANSFORMERS_HOME=/app/model_cache
 
-# Create model cache directory
-RUN mkdir -p ${SENTENCE_TRANSFORMERS_HOME}
-
-# Pre-download model during build
-RUN python -c "from sentence_transformers import SentenceTransformer; SentenceTransformer('all-MiniLM-L6-v2')"
 
 # Expose port
 EXPOSE 8000
 
 # Run the application
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["sh", "-c", "uvicorn app:app --host 0.0.0.0 --port ${PORT:-8000}"]
