@@ -219,9 +219,9 @@ python cli.py resume.pdf job_description.pdf --json-only
 ### Vector Store Settings
 
 The system uses FAISS with the following default settings:
-- **Embedding Model**: `all-MiniLM-L6-v2` (Sentence Transformers)
+- **Embedding Model**: `text-embedding-3-large` (OpenAI/Azure OpenAI)
 - **Index Type**: IndexFlatIP (Inner Product for cosine similarity)
-- **Dimension**: 384 (Sentence Transformers output dimension)
+- **Dimension**: 384 (OpenAI embedding output dimension)
 
 ### LLM Settings
 
@@ -231,7 +231,7 @@ The system uses FAISS with the following default settings:
 
 1. **Document Parsing**: Extract text from PDF/DOCX files
 2. **Text Chunking**: Split documents into semantic, CV-aware chunks
-3. **Vector Embedding**: Generate embeddings using Sentence Transformers
+3. **Vector Embedding**: Generate embeddings using OpenAI embedding model
 4. **Requirement Extraction**: Extract job requirements using Groq Llama (JSON mode)
 5. **Profile Extraction**: Extract candidate information from resume
 6. **Similarity Matching**: Find relevant resume chunks for each requirement
@@ -304,9 +304,35 @@ curl http://localhost:8000/health
 ### Performance Tips
 
 - Use smaller chunk sizes for faster processing
-- Enable GPU acceleration for Sentence Transformers if available
 - Consider using a more powerful LLM for better accuracy
 
+## 🚀 Deploying on Railway
 
+You can easily deploy this project to [Railway](https://railway.app/) for cloud hosting.
+
+### Steps:
+
+1. **Push your code to GitHub** (if not already):
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit"
+   git remote add origin <your-repo-url>
+   git push -u origin main
+   ```
+2. **Create a Railway account** at [railway.app](https://railway.app/).
+3. **New Project → Deploy from GitHub repo**: Select your repository.
+4. **Set environment variables**:
+   - Add your `GROQ_API_KEY` and any other required keys in the Railway dashboard under the Environment tab.
+5. **Deploy**: Railway will auto-detect the Python project and use your `requirements.txt` and `dockerfile`.
+6. **Access your app**: Once deployed, Railway will provide a public URL (e.g., `https://your-app.up.railway.app`).
+   - The web UI will be at `/ui` (e.g., `https://your-app.up.railway.app/ui`).
+   - The API will be at `/evaluate-fit`.
+
+**Note:**
+- Make sure your frontend (UI) uses relative API paths (e.g., `/evaluate-fit`) so it works both locally and on Railway.
+- If you need to customize the port, Railway sets the `PORT` environment variable automatically.
+
+---
 
 **Built with ❤️ using FastAPI, FAISS, and Groq (Llama)** 
