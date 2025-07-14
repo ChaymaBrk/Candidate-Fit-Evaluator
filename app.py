@@ -25,8 +25,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-# Add this below your CORS middleware setup
-app.mount("/", StaticFiles(directory="static", html=True), name="static")
+
 @app.get("/")
 async def root():
     return {"message": "AI Candidate Fit Evaluator API", "status": "running"}
@@ -80,9 +79,7 @@ async def health_check():
     """Health check endpoint"""
     return {"status": "healthy", "service": "AI Candidate Fit Evaluator"}
 
-@app.get("/ui")
-async def get_ui():
-    return FileResponse("index.html")
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000) 
