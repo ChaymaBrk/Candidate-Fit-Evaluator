@@ -58,7 +58,6 @@ class VectorStore:
                 model=self.embedding_model
             )
             embeddings = response.data[0].embedding
-            print(embeddings)
             
             if len(embeddings) > 0:
                 

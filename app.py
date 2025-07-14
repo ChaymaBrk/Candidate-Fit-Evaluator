@@ -25,7 +25,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
+# Add this below your CORS middleware setup
+app.mount("/", StaticFiles(directory="static", html=True), name="static")
 @app.get("/")
 async def root():
     return {"message": "AI Candidate Fit Evaluator API", "status": "running"}
